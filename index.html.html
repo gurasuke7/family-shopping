@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家族の買い物リスト</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
+      background: #F7F7F2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Header */
+    header {
+      background: #2D4A3E;
+      color: #fff;
+      padding: 18px 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .header-title { font-size: 20px; font-weight: 700; }
+
+    .header-status { font-size: 11px; margin-top: 3px; color: #7DD3B8; min-height: 16px; }
+    .header-status.error { color: #FF8A80; }
+
+    .badge {
+      background: rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* Tabs */
+    .tabs { display: flex; }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 0;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .tab-btn.active {
+      border-bottom-color: #7DD3B8;
+      color: #7DD3B8;
+      font-weight: 700;
+    }
+
+    /* Main */
+    main { flex: 1; padding: 16px; padding-bottom: 80px; }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #aaa;
+    }
+    .loading .icon { font-size: 36px; margin-bottom: 12px; }
+
+    /* Form */
+    .form-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .required { color: #E94560; }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 16px;
+      border: 2px solid #e5e5e5;
+      border-radius: 10px;
+      outline: none;
+      background: #FAFAF7;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus { border-color: #2D4A3E; }
+    input.error-border { border-color: #E94560; }
+
+    .error-msg { color: #E94560; font-size: 12px; margin-top: 4px; }
+
+    .row { display: flex; gap: 10px; }
+    .row .form-group { flex: 1; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: #2D4A3E;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+    .btn-primary:disabled { background: #aaa; cursor: not-allowed; }
+    .btn-primary:hover:not(:disabled) { background: #3a6352; }
+
+    /* Empty */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #aaa;
+    }
+    .empty .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty .title { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: #bbb; }
+    .empty .sub { font-size: 13px; }
+
+    /* Section header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 24px 0 8px;
+    }
+    .section-label { color: #888; font-size: 13px; font-weight: 600; }
+    .btn-clear {
+      background: none;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: #999;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-clear:hover { background: #f5f5f5; }
+
+    /* Item card */
+    .item-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+      transition: opacity 0.3s;
+      border-left: 4px solid transparent;
+    }
+    .item-card.checked {
+      opacity: 0.55;
+      border-left-color: #7DD3B8;
+    }
+
+    .check-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .check-btn.checked {
+      border-color: #2D4A3E;
+      background: #2D4A3E;
+      color: #7DD3B8;
+    }
+
+    .item-content { flex: 1; min-width: 0; }
+    .item-name {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1A1A2E;
+      margin-bottom: 4px;
+    }
+    .item-name.checked {
+      text-decoration: line-through;
+      color: #aaa;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      font-size: 12px;
+      border-radius: 6px;
+      padding: 2px 8px;
+    }
+    .tag-qty { background: #EEF5FF; color: #3B7DD8; font-weight: 600; }
+    .tag-price { background: #FFF5EE; color: #CC6600; }
+    .tag-date { background: #F0FFF8; color: #2D8A5E; font-size: 11px; }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #ddd;
+      font-size: 20px;
+      padding: 0 4px;
+      flex-shrink: 0;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .delete-btn:hover { color: #E94560; }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: calc(50% - 240px + 24px);
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #2D4A3E;
+      color: #fff;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(45,74,62,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      transition: background 0.2s;
+    }
+    .fab:hover { background: #3a6352; }
+
+    @media (max-width: 480px) {
+      .fab { right: 24px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="header-top">
+      <div>
+        <div class="header-title">🛒 家族の買い物リスト</div>
+        <div class="header-status" id="syncStatus">読み込み中...</div>
+      </div>
+      <div class="badge" id="countBadge">残り 0 品</div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" id="tabList" onclick="switchTab('list')">📋 リスト</button>
+      <button class="tab-btn" id="tabAdd" onclick="switchTab('add')">＋ 追加</button>
+    </div>
+  </header>
+
+  <main id="mainContent"></main>
+
+  <button class="fab" id="fab" onclick="switchTab('add')">＋</button>
+</div>
+
+<script>
+  const FIREBASE_URL = "https://family-shopping-9ae82-default-rtdb.asia-southeast1.firebasedatabase.app";
+  const POLL_INTERVAL = 4000;
+  const UNITS = ["個", "本", "袋", "枚", "缶", "箱", "パック", "kg", "g", "L", "ml", "束"];
+
+  let items = [];
+  let currentTab = "list";
+  let pollTimer = null;
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`;
+  }
+
+  function setStatus(msg, isError = false) {
+    const el = document.getElementById("syncStatus");
+    el.textContent = msg;
+    el.className = "header-status" + (isError ? " error" : "");
+  }
+
+  function updateBadge() {
+    const count = items.filter(i => !i.checked).length;
+    document.getElementById("countBadge").textContent = `残り ${count} 品`;
+  }
+
+  // Firebase REST API
+  async function fetchItems() {
+    const res = await fetch(`${FIREBASE_URL}/shopping/items.json`);
+    if (!res.ok) throw new Error("fetch error");
+    const data = await res.json();
+    if (!data) return [];
+    return Object.entries(data).map(([id, val]) => ({ id, ...val }))
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  }
+
+  async function putItem(item) {
+    const res = await fetch(`${FIREBASE_URL}/shopping/items/${item.id}.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(item),
+    });
+    if (!res.ok) throw new Error("put error");
+  }
+
+  async function removeItem(id) {
+    const res = await fetch(`${FIREBASE_URL}/shopping/items/${id}.json`, { method: "DELETE" });
+    if (!res.ok) throw new Error("delete error");
+  }
+
+  // Load & Poll
+  async function loadItems(showLoading = false) {
+    if (showLoading) {
+      setStatus("読み込み中...");
+      renderMain();
+    }
+    try {
+      items = await fetchItems();
+      setStatus("✓ Firebase同期済み");
+      updateBadge();
+      if (currentTab === "list") renderList();
+    } catch {
+      setStatus("⚠ 同期失敗 — ネット接続を確認", true);
+    }
+  }
+
+  function startPolling() {
+    pollTimer = setInterval(() => loadItems(false), POLL_INTERVAL);
+  }
+
+  // Tab switching
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById("tabList").className = "tab-btn" + (tab === "list" ? " active" : "");
+    document.getElementById("tabAdd").className = "tab-btn" + (tab === "add" ? " active" : "");
+    document.getElementById("fab").style.display = tab === "list" ? "flex" : "none";
+    renderMain();
+  }
+
+  function renderMain() {
+    if (currentTab === "list") renderList();
+    else renderForm();
+  }
+
+  // List view
+  function renderList() {
+    const unchecked = items.filter(i => !i.checked);
+    const checked = items.filter(i => i.checked);
+    const main = document.getElementById("mainContent");
+
+    if (items.length === 0) {
+      main.innerHTML = `
+        <div class="empty">
+          <div class="icon">🛒</div>
+          <div class="title">リストは空です</div>
+          <div class="sub">「＋ 追加」から商品を追加してください</div>
+        </div>`;
+      return;
+    }
+
+    let html = unchecked.map(item => itemCardHTML(item)).join("");
+
+    if (checked.length > 0) {
+      html += `
+        <div class="section-header">
+          <span class="section-label">✓ 購入済み (${checked.length}件)</span>
+          <button class="btn-clear" onclick="clearChecked()">まとめて削除</button>
+        </div>`;
+      html += checked.map(item => itemCardHTML(item)).join("");
+    }
+
+    main.innerHTML = html;
+  }
+
+  function itemCardHTML(item) {
+    const tags = [];
+    if (item.qty || item.unit) tags.push(`<span class="tag tag-qty">${item.qty || ""}${item.unit || ""}</span>`);
+    if (item.price) tags.push(`<span class="tag tag-price">💴 ${item.price}</span>`);
+    if (item.checked && item.checkedAt) tags.push(`<span class="tag tag-date">購入 ${formatDate(item.checkedAt)}</span>`);
+
+    return `
+      <div class="item-card ${item.checked ? "checked" : ""}">
+        <button class="check-btn ${item.checked ? "checked" : ""}" onclick="toggleCheck('${item.id}')">
+          ${item.checked ? "✓" : ""}
+        </button>
+        <div class="item-content">
+          <div class="item-name ${item.checked ? "checked" : ""}">${escapeHtml(item.name)}</div>
+          ${tags.length > 0 ? `<div class="tags">${tags.join("")}</div>` : ""}
+        </div>
+        <button class="delete-btn" onclick="deleteItem('${item.id}')">×</button>
+      </div>`;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  // Add form
+  function renderForm() {
+    const unitOptions = UNITS.map(u => `<option value="${u}">${u}</option>`).join("");
+    document.getElementById("mainContent").innerHTML = `
+      <div class="form-card">
+        <div class="form-group">
+          <label class="form-label">商品名 <span class="required">*必須</span></label>
+          <input type="text" id="inputName" placeholder="例：牛乳" autofocus>
+          <div class="error-msg" id="nameError" style="display:none">商品名は必須です</div>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label class="form-label">数量</label>
+            <input type="number" id="inputQty" placeholder="2">
+          </div>
+          <div class="form-group">
+            <label class="form-label">単位</label>
+            <select id="inputUnit">
+              <option value="">選択</option>
+              ${unitOptions}
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label">価格メモ</label>
+          <input type="text" id="inputPrice" placeholder="例：¥198 (イオン) vs ¥178 (ライフ)">
+        </div>
+        <button class="btn-primary" id="addBtn" onclick="addItem()">リストに追加する</button>
+      </div>`;
+
+    document.getElementById("inputName").addEventListener("keydown", e => {
+      if (e.key === "Enter") addItem();
+    });
+  }
+
+  // Actions
+  async function addItem() {
+    const name = document.getElementById("inputName").value.trim();
+    if (!name) {
+      document.getElementById("inputName").classList.add("error-border");
+      document.getElementById("nameError").style.display = "block";
+      return;
+    }
+
+    const item = {
+      id: Date.now().toString(),
+      name,
+      qty: document.getElementById("inputQty").value,
+      unit: document.getElementById("inputUnit").value,
+      price: document.getElementById("inputPrice").value,
+      checked: false,
+      checkedAt: null,
+      createdAt: Date.now(),
+    };
+
+    const btn = document.getElementById("addBtn");
+    btn.disabled = true;
+    btn.textContent = "保存中...";
+    setStatus("⟳ 同期中...");
+
+    try {
+      await putItem(item);
+      items.unshift(item);
+      updateBadge();
+      setStatus("✓ Firebase同期済み");
+      switchTab("list");
+    } catch {
+      setStatus("⚠ 保存失敗", true);
+      btn.disabled = false;
+      btn.textContent = "リストに追加する";
+    }
+  }
+
+  async function toggleCheck(id) {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    item.checked = !item.checked;
+    item.checkedAt = item.checked ? new Date().toISOString() : null;
+    renderList();
+    updateBadge();
+    setStatus("⟳ 同期中...");
+    try {
+      await putItem(item);
+      setStatus("✓ Firebase同期済み");
+    } catch {
+      setStatus("⚠ 同期失敗", true);
+    }
+  }
+
+  async function deleteItem(id) {
+    items = items.filter(i => i.id !== id);
+    renderList();
+    updateBadge();
+    setStatus("⟳ 同期中...");
+    try {
+      await removeItem(id);
+      setStatus("✓ Firebase同期済み");
+    } catch {
+      setStatus("⚠ 削除失敗", true);
+    }
+  }
+
+  async function clearChecked() {
+    const toDelete = items.filter(i => i.checked);
+    items = items.filter(i => !i.checked);
+    renderList();
+    updateBadge();
+    setStatus("⟳ 同期中...");
+    try {
+      await Promise.all(toDelete.map(i => removeItem(i.id)));
+      setStatus("✓ Firebase同期済み");
+    } catch {
+      setStatus("⚠ 削除失敗", true);
+    }
+  }
+
+  // Init
+  loadItems(true);
+  startPolling();
+</script>
+</body>
+</html>
