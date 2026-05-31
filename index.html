@@ -6,292 +6,89 @@
   <title>家族の買い物リスト</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', sans-serif;
-      background: #F7F7F2;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #app {
-      width: 100%;
-      max-width: 480px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-    header {
-      background: #2D4A3E;
-      color: #fff;
-      padding: 18px 20px 0;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-    }
-    .header-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-    .header-title { font-size: 20px; font-weight: 700; }
-    .header-status { font-size: 11px; margin-top: 3px; color: #7DD3B8; min-height: 16px; }
-    .header-status.error { color: #FF8A80; }
-    .badge {
-      background: rgba(255,255,255,0.12);
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 13px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    .tabs { display: flex; }
-    .tab-btn {
-      flex: 1;
-      padding: 10px 0;
-      background: none;
-      border: none;
-      border-bottom: 3px solid transparent;
-      color: rgba(255,255,255,0.5);
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-    .tab-btn.active {
-      border-bottom-color: #7DD3B8;
-      color: #7DD3B8;
-      font-weight: 700;
-    }
-    main { flex: 1; padding: 16px; padding-bottom: 80px; }
-    .loading { text-align: center; padding: 60px 20px; color: #aaa; }
-    .form-card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    }
-    .form-group { margin-bottom: 14px; }
-    .form-label { font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 6px; }
-    .required { color: #E94560; }
-    input, select {
-      width: 100%;
-      padding: 12px 14px;
-      font-size: 16px;
-      border: 2px solid #e5e5e5;
-      border-radius: 10px;
-      outline: none;
-      background: #FAFAF7;
-      font-family: inherit;
-      transition: border-color 0.2s;
-    }
-    input:focus, select:focus { border-color: #2D4A3E; }
-    input.error-border { border-color: #E94560; }
-    .error-msg { color: #E94560; font-size: 12px; margin-top: 4px; }
-    .row { display: flex; gap: 10px; }
-    .row .form-group { flex: 1; }
-    .price-preview {
-      background: #F0FFF8;
-      border: 1px solid #7DD3B8;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 12px;
-      color: #2D8A5E;
-      margin-top: 6px;
-      display: none;
-    }
-    .btn-primary {
-      width: 100%;
-      padding: 14px;
-      background: #2D4A3E;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.2s;
-    }
-    .btn-primary:disabled { background: #aaa; cursor: not-allowed; }
-    .btn-primary:hover:not(:disabled) { background: #3a6352; }
-    .empty { text-align: center; padding: 60px 20px; color: #aaa; }
-    .empty .icon { font-size: 48px; margin-bottom: 12px; }
-    .empty .title { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: #bbb; }
-    .empty .sub { font-size: 13px; }
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 24px 0 8px;
-    }
-    .section-label { color: #888; font-size: 13px; font-weight: 600; }
-    .btn-clear {
-      background: none;
-      border: 1px solid #ddd;
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 12px;
-      color: #999;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    .btn-clear:hover { background: #f5f5f5; }
-
-    /* Item card */
-    .item-card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 14px 16px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-      transition: opacity 0.3s;
-      border-left: 4px solid transparent;
-      position: relative;
-    }
-    .item-card.checked { opacity: 0.55; border-left-color: #7DD3B8; }
-    .item-card.rank-1 { border-left-color: #F59E0B; }
-    .item-card.rank-2 { border-left-color: #9CA3AF; }
-    .item-card.rank-3 { border-left-color: #B45309; }
-
-    .check-btn {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      border: 2px solid #ccc;
-      background: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      transition: all 0.2s;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .check-btn.checked { border-color: #2D4A3E; background: #2D4A3E; color: #7DD3B8; }
-
-    .item-content { flex: 1; min-width: 0; }
-    .item-name { font-size: 17px; font-weight: 600; color: #1A1A2E; margin-bottom: 4px; }
-    .item-name.checked { text-decoration: line-through; color: #aaa; }
-
-    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
-    .tag { font-size: 12px; border-radius: 6px; padding: 2px 8px; }
-    .tag-qty { background: #EEF5FF; color: #3B7DD8; font-weight: 600; }
-    .tag-price { background: #FFF5EE; color: #CC6600; }
-    .tag-unit-price { background: #FFFBEB; color: #B45309; font-weight: 700; }
-    .tag-cheapest { background: #F0FFF4; color: #16A34A; font-weight: 700; }
-    .tag-date { background: #F0FFF8; color: #2D8A5E; font-size: 11px; }
-
-    /* 削除ボタンエリア */
-    .delete-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-    .delete-btn {
-      background: none;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      cursor: pointer;
-      color: #ccc;
-      font-size: 13px;
-      padding: 4px 8px;
-      line-height: 1;
-      transition: all 0.2s;
-      font-family: inherit;
-      white-space: nowrap;
-    }
-    .delete-btn:hover { background: #FFF0F0; border-color: #E94560; color: #E94560; }
-
-    /* 確認ダイアログ */
-    .confirm-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .confirm-dialog {
-      background: #fff;
-      border-radius: 16px;
-      padding: 24px;
-      max-width: 320px;
-      width: 100%;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    }
-    .confirm-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #1A1A2E; }
-    .confirm-msg { font-size: 14px; color: #666; margin-bottom: 20px; line-height: 1.6; }
-    .confirm-btns { display: flex; gap: 10px; }
-    .btn-cancel {
-      flex: 1; padding: 12px;
-      background: #f5f5f5; color: #666;
-      border: none; border-radius: 10px;
-      font-size: 15px; cursor: pointer;
-      font-family: inherit;
-    }
-    .btn-danger {
-      flex: 1; padding: 12px;
-      background: #E94560; color: #fff;
-      border: none; border-radius: 10px;
-      font-size: 15px; font-weight: 700;
-      cursor: pointer; font-family: inherit;
-    }
-
-    /* 価格比較バナー */
-    .compare-banner {
-      background: #FFFBEB;
-      border: 1px solid #FCD34D;
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 12px;
-      font-size: 13px;
-      color: #92400E;
-    }
-    .compare-banner strong { font-size: 14px; }
-
-    .rank-badge {
-      position: absolute;
-      top: -6px;
-      right: 10px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 10px;
-    }
-    .rank-badge.r1 { background: #FEF3C7; color: #D97706; }
-    .rank-badge.r2 { background: #F3F4F6; color: #6B7280; }
-    .rank-badge.r3 { background: #FEF3C7; color: #92400E; }
-
-    .fab {
-      position: fixed;
-      bottom: 24px;
-      right: calc(50% - 240px + 24px);
-      width: 56px; height: 56px;
-      border-radius: 50%;
-      background: #2D4A3E;
-      color: #fff;
-      border: none;
-      font-size: 28px;
-      cursor: pointer;
-      box-shadow: 0 4px 20px rgba(45,74,62,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 20;
-    }
-    .fab:hover { background: #3a6352; }
-    @media (max-width: 480px) { .fab { right: 24px; } }
+    body { font-family: 'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif; background:#F7F7F2; min-height:100vh; display:flex; flex-direction:column; align-items:center; }
+    #app { width:100%; max-width:480px; min-height:100vh; display:flex; flex-direction:column; }
+    header { background:#2D4A3E; color:#fff; padding:16px 20px 0; position:sticky; top:0; z-index:10; box-shadow:0 2px 12px rgba(0,0,0,0.15); }
+    .header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .header-title { font-size:19px; font-weight:700; }
+    .header-status { font-size:11px; margin-top:2px; color:#7DD3B8; min-height:15px; }
+    .header-status.error { color:#FF8A80; }
+    .badge { background:rgba(255,255,255,0.12); border-radius:20px; padding:5px 12px; font-size:13px; font-weight:600; }
+    .tabs { display:flex; }
+    .tab-btn { flex:1; padding:9px 0; background:none; border:none; border-bottom:3px solid transparent; color:rgba(255,255,255,0.5); font-size:13px; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+    .tab-btn.active { border-bottom-color:#7DD3B8; color:#7DD3B8; font-weight:700; }
+    .filter-bar { background:#fff; padding:10px 16px; border-bottom:1px solid #eee; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+    .filter-bar::-webkit-scrollbar { display:none; }
+    .filter-chip { flex-shrink:0; padding:5px 12px; border-radius:20px; border:1.5px solid #ddd; background:#fff; color:#666; font-size:13px; cursor:pointer; font-family:inherit; white-space:nowrap; transition:all 0.2s; }
+    .filter-chip.active { background:#2D4A3E; color:#fff; border-color:#2D4A3E; font-weight:600; }
+    main { flex:1; padding:14px 16px 80px; }
+    .item-card { background:#fff; border-radius:14px; padding:12px 14px; margin-bottom:10px; display:flex; align-items:flex-start; gap:10px; box-shadow:0 1px 6px rgba(0,0,0,0.06); border-left:4px solid transparent; position:relative; transition:opacity 0.3s; }
+    .item-card.checked { opacity:0.5; border-left-color:#7DD3B8; }
+    .item-card.rank-1 { border-left-color:#F59E0B; }
+    .item-card.rank-2 { border-left-color:#9CA3AF; }
+    .item-card.rank-3 { border-left-color:#B45309; }
+    .check-btn { width:26px; height:26px; border-radius:50%; border:2px solid #ccc; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; transition:all 0.2s; flex-shrink:0; margin-top:2px; }
+    .check-btn.checked { border-color:#2D4A3E; background:#2D4A3E; color:#7DD3B8; }
+    .item-content { flex:1; min-width:0; }
+    .item-meta { font-size:11px; color:#aaa; margin-bottom:2px; }
+    .item-name { font-size:16px; font-weight:600; color:#1A1A2E; margin-bottom:3px; }
+    .item-name.checked { text-decoration:line-through; color:#aaa; }
+    .tags { display:flex; flex-wrap:wrap; gap:5px; }
+    .tag { font-size:11px; border-radius:6px; padding:2px 7px; }
+    .tag-qty { background:#EEF5FF; color:#3B7DD8; font-weight:600; }
+    .tag-price { background:#FFF5EE; color:#CC6600; }
+    .tag-unit-price { background:#FFFBEB; color:#B45309; font-weight:700; }
+    .tag-cheapest { background:#F0FFF4; color:#16A34A; font-weight:700; }
+    .tag-date { background:#F0FFF8; color:#2D8A5E; font-size:10px; }
+    .rank-badge { position:absolute; top:-6px; right:10px; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; }
+    .rank-badge.r1 { background:#FEF3C7; color:#D97706; }
+    .rank-badge.r2 { background:#F3F4F6; color:#6B7280; }
+    .rank-badge.r3 { background:#FEF3C7; color:#92400E; }
+    .delete-btn { background:none; border:1px solid #eee; border-radius:8px; cursor:pointer; color:#ccc; font-size:12px; padding:4px 7px; line-height:1; transition:all 0.2s; font-family:inherit; flex-shrink:0; margin-top:2px; }
+    .delete-btn:hover { background:#FFF0F0; border-color:#E94560; color:#E94560; }
+    .section-header { display:flex; align-items:center; justify-content:space-between; margin:20px 0 8px; }
+    .section-label { color:#888; font-size:13px; font-weight:600; }
+    .btn-clear { background:none; border:1px solid #ddd; border-radius:20px; padding:3px 10px; font-size:12px; color:#999; cursor:pointer; font-family:inherit; }
+    .form-card { background:#fff; border-radius:16px; padding:18px; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+    .form-group { margin-bottom:13px; }
+    .form-label { font-size:12px; font-weight:600; color:#666; display:block; margin-bottom:5px; }
+    .required { color:#E94560; }
+    input[type=text],input[type=number],select { width:100%; padding:11px 13px; font-size:15px; border:2px solid #e5e5e5; border-radius:10px; outline:none; background:#FAFAF7; font-family:inherit; transition:border-color 0.2s; }
+    input:focus,select:focus { border-color:#2D4A3E; }
+    input.error-border { border-color:#E94560; }
+    .error-msg { color:#E94560; font-size:12px; margin-top:4px; }
+    .row { display:flex; gap:10px; }
+    .row .form-group { flex:1; }
+    .price-preview { background:#F0FFF8; border:1px solid #7DD3B8; border-radius:8px; padding:7px 11px; font-size:12px; color:#2D8A5E; margin-top:5px; display:none; }
+    .btn-primary { width:100%; padding:13px; background:#2D4A3E; color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; transition:background 0.2s; }
+    .btn-primary:disabled { background:#aaa; cursor:not-allowed; }
+    .btn-primary:hover:not(:disabled) { background:#3a6352; }
+    .cat-select-row { display:flex; gap:8px; align-items:flex-end; }
+    .cat-select-row select { flex:1; }
+    .btn-new-cat { flex-shrink:0; padding:11px 12px; background:#F0F9F5; color:#2D4A3E; border:2px solid #2D4A3E; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
+    .btn-new-cat:hover { background:#2D4A3E; color:#fff; }
+    .settings-section { margin-bottom:20px; }
+    .settings-title { font-size:14px; font-weight:700; color:#2D4A3E; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid #e5e5e5; }
+    .cat-item { background:#fff; border-radius:10px; padding:10px 14px; margin-bottom:8px; display:flex; align-items:center; box-shadow:0 1px 4px rgba(0,0,0,0.05); gap:10px; }
+    .cat-item-name { flex:1; font-size:14px; font-weight:600; color:#333; }
+    .cat-item-sub { font-size:12px; color:#aaa; margin-top:2px; }
+    .btn-icon { background:none; border:none; cursor:pointer; font-size:16px; padding:4px; color:#ccc; transition:color 0.2s; }
+    .btn-icon:hover { color:#E94560; }
+    .btn-add-cat { width:100%; padding:10px; background:#F0F9F5; color:#2D4A3E; border:2px dashed #7DD3B8; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
+    .btn-add-cat:hover { background:#e0f5ec; }
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; }
+    .modal { background:#fff; border-radius:16px; padding:22px; max-width:340px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,0.2); }
+    .modal-title { font-size:16px; font-weight:700; margin-bottom:14px; color:#1A1A2E; }
+    .modal-btns { display:flex; gap:10px; margin-top:16px; }
+    .btn-cancel { flex:1; padding:11px; background:#f5f5f5; color:#666; border:none; border-radius:10px; font-size:14px; cursor:pointer; font-family:inherit; }
+    .btn-ok { flex:1; padding:11px; background:#2D4A3E; color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .btn-danger-sm { flex:1; padding:11px; background:#E94560; color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .compare-banner { background:#FFFBEB; border:1px solid #FCD34D; border-radius:10px; padding:10px 14px; margin-bottom:10px; font-size:12px; color:#92400E; }
+    .empty { text-align:center; padding:50px 20px; color:#aaa; }
+    .empty .icon { font-size:44px; margin-bottom:10px; }
+    .empty .title { font-size:15px; font-weight:600; margin-bottom:5px; color:#bbb; }
+    .fab { position:fixed; bottom:24px; right:calc(50% - 240px + 24px); width:54px; height:54px; border-radius:50%; background:#2D4A3E; color:#fff; border:none; font-size:26px; cursor:pointer; box-shadow:0 4px 20px rgba(45,74,62,0.5); display:flex; align-items:center; justify-content:center; z-index:20; }
+    @media(max-width:480px){.fab{right:24px;}}
   </style>
 </head>
 <body>
@@ -307,365 +104,290 @@
     <div class="tabs">
       <button class="tab-btn active" id="tabList" onclick="switchTab('list')">📋 リスト</button>
       <button class="tab-btn" id="tabAdd" onclick="switchTab('add')">＋ 追加</button>
+      <button class="tab-btn" id="tabSettings" onclick="switchTab('settings')">⚙ 設定</button>
     </div>
   </header>
-
+  <div id="filterBar" class="filter-bar" style="display:none"></div>
   <main id="mainContent"></main>
   <button class="fab" id="fab" onclick="switchTab('add')">＋</button>
 </div>
-
-<!-- 削除確認ダイアログ -->
-<div class="confirm-overlay" id="confirmOverlay" style="display:none">
-  <div class="confirm-dialog">
-    <div class="confirm-title">🗑 削除しますか？</div>
-    <div class="confirm-msg" id="confirmMsg"></div>
-    <div class="confirm-btns">
-      <button class="btn-cancel" onclick="closeConfirm()">キャンセル</button>
-      <button class="btn-danger" onclick="confirmDelete()">削除する</button>
-    </div>
-  </div>
+<div class="modal-overlay" id="modalOverlay" style="display:none">
+  <div class="modal" id="modalContent"></div>
 </div>
-
 <script>
-  const FIREBASE_URL = "https://family-shopping-9ae82-default-rtdb.asia-southeast1.firebasedatabase.app";
-  const POLL_INTERVAL = 4000;
-  const UNITS = ["個", "本", "袋", "枚", "缶", "箱", "パック", "kg", "g", "L", "ml", "束"];
+const FB="https://family-shopping-9ae82-default-rtdb.asia-southeast1.firebasedatabase.app";
+const UNITS=["個","本","袋","枚","缶","箱","パック","kg","g","L","ml","束"];
+let items=[],categories=[],currentTab="list",filterCat="all",filterStore="all",pendingAction=null;
 
-  let items = [];
-  let currentTab = "list";
-  let pendingDeleteId = null;
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function fmtDate(iso){const d=new Date(iso);return`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`;}
+function calcUp(price,qty){const p=parseFloat(String(price).replace(/[^0-9.]/g,"")),q=parseFloat(qty);return(!isNaN(p)&&!isNaN(q)&&q>0)?p/q:null;}
+function setStatus(msg,err=false){const el=document.getElementById("syncStatus");el.textContent=msg;el.className="header-status"+(err?" error":"");}
+function updateBadge(){
+  const vis=getVisible();
+  const total=items.filter(i=>!i.checked).length;
+  const shown=vis.filter(i=>!i.checked).length;
+  const filtered=filterCat!=="all"||filterStore!=="all";
+  document.getElementById("countBadge").textContent=filtered?`表示 ${shown}/${total} 品`:`残り ${total} 品`;
+}
 
-  function formatDate(iso) {
-    const d = new Date(iso);
-    return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`;
-  }
+async function fbGet(p){const r=await fetch(FB+p+".json");if(!r.ok)throw new Error();return r.json();}
+async function fbPut(p,d){const r=await fetch(FB+p+".json",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});if(!r.ok)throw new Error();}
+async function fbDel(p){const r=await fetch(FB+p+".json",{method:"DELETE"});if(!r.ok)throw new Error();}
 
-  function setStatus(msg, isError = false) {
-    const el = document.getElementById("syncStatus");
-    el.textContent = msg;
-    el.className = "header-status" + (isError ? " error" : "");
-  }
+async function loadAll(init=false){
+  if(init)setStatus("読み込み中...");
+  try{
+    const[iD,cD]=await Promise.all([fbGet("/shopping/items"),fbGet("/shopping/categories")]);
+    items=iD?Object.entries(iD).map(([id,v])=>({id,...v})).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)):[];
+    categories=cD?Object.entries(cD).map(([id,v])=>({id,...v})):[];
+    setStatus("✓ Firebase同期済み");
+    updateBadge();
+    if(currentTab==="list"){renderFilterBar();renderList();}
+  }catch{setStatus("⚠ 同期失敗",true);}
+}
 
-  function updateBadge() {
-    const count = items.filter(i => !i.checked).length;
-    document.getElementById("countBadge").textContent = `残り ${count} 品`;
-  }
+function getVisible(){
+  return items.filter(i=>{
+    if(filterCat!=="all"&&i.categoryId!==filterCat)return false;
+    if(filterStore!=="all"&&i.storeId!==filterStore)return false;
+    return true;
+  });
+}
 
-  // 単価計算
-  function calcUnitPrice(price, qty) {
-    const p = parseFloat(price.replace(/[^0-9.]/g, ""));
-    const q = parseFloat(qty);
-    if (!isNaN(p) && !isNaN(q) && q > 0) return p / q;
-    return null;
-  }
-
-  // Firebase REST API
-  async function fetchItems() {
-    const res = await fetch(`${FIREBASE_URL}/shopping/items.json`);
-    if (!res.ok) throw new Error("fetch error");
-    const data = await res.json();
-    if (!data) return [];
-    return Object.entries(data).map(([id, val]) => ({ id, ...val }))
-      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  }
-
-  async function putItem(item) {
-    const res = await fetch(`${FIREBASE_URL}/shopping/items/${item.id}.json`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(item),
+function renderFilterBar(){
+  const bar=document.getElementById("filterBar");
+  if(currentTab!=="list"){bar.style.display="none";return;}
+  bar.style.display="flex";
+  let h=`<button class="filter-chip ${filterCat==="all"&&filterStore==="all"?"active":""}" onclick="setFilter('all','all')">すべて</button>`;
+  categories.forEach(c=>{
+    h+=`<button class="filter-chip ${filterCat===c.id&&filterStore==="all"?"active":""}" onclick="setFilter('${c.id}','all')">${esc(c.name)}</button>`;
+    (c.stores||[]).forEach(s=>{
+      h+=`<button class="filter-chip ${filterCat===c.id&&filterStore===s.id?"active":""}" onclick="setFilter('${c.id}','${s.id}')">${esc(s.name)}</button>`;
     });
-    if (!res.ok) throw new Error("put error");
-  }
+  });
+  bar.innerHTML=h;
+}
 
-  async function removeItem(id) {
-    const res = await fetch(`${FIREBASE_URL}/shopping/items/${id}.json`, { method: "DELETE" });
-    if (!res.ok) throw new Error("delete error");
-  }
+function setFilter(cat,store){filterCat=cat;filterStore=store;renderFilterBar();renderList();updateBadge();}
 
-  async function loadItems(showLoading = false) {
-    if (showLoading) { setStatus("読み込み中..."); renderMain(); }
-    try {
-      items = await fetchItems();
-      setStatus("✓ Firebase同期済み");
-      updateBadge();
-      if (currentTab === "list") renderList();
-    } catch {
-      setStatus("⚠ 同期失敗 — ネット接続を確認", true);
-    }
-  }
+function getPriceRanks(list){
+  const g={};
+  list.forEach(i=>{
+    if(i.price&&i.qty){const up=calcUp(i.price,i.qty);if(up!==null){const k=i.name.trim().toLowerCase();if(!g[k])g[k]=[];g[k].push({id:i.id,up});}}
+  });
+  const ranks={};
+  Object.values(g).forEach(arr=>{arr.sort((a,b)=>a.up-b.up);arr.forEach((x,i)=>ranks[x.id]={rank:i+1,up:x.up});});
+  return ranks;
+}
 
-  function switchTab(tab) {
-    currentTab = tab;
-    document.getElementById("tabList").className = "tab-btn" + (tab === "list" ? " active" : "");
-    document.getElementById("tabAdd").className = "tab-btn" + (tab === "add" ? " active" : "");
-    document.getElementById("fab").style.display = tab === "list" ? "flex" : "none";
-    renderMain();
-  }
+function getCatName(item){
+  const c=categories.find(x=>x.id===item.categoryId);
+  if(!c)return"";
+  const s=(c.stores||[]).find(x=>x.id===item.storeId);
+  return c.name+(s?` › ${s.name}`:"");
+}
 
-  function renderMain() {
-    if (currentTab === "list") renderList();
-    else renderForm();
+function renderList(){
+  const main=document.getElementById("mainContent");
+  const vis=getVisible();
+  const unc=vis.filter(i=>!i.checked);
+  const chk=vis.filter(i=>i.checked);
+  if(vis.length===0){
+    main.innerHTML=`<div class="empty"><div class="icon">🛒</div><div class="title">${items.length===0?"リストは空です":"該当する商品がありません"}</div><div style="font-size:13px;color:#bbb">${items.length===0?"「＋ 追加」から商品を追加してください":"フィルターを変えてみてください"}</div></div>`;
+    return;
   }
+  const ranks=getPriceRanks(unc);
+  const hasComp=Object.values(ranks).filter(r=>r.rank>0).length>1;
+  const sorted=[...unc].sort((a,b)=>{
+    const ra=ranks[a.id],rb=ranks[b.id];
+    if(ra&&rb&&ra.rank>0&&rb.rank>0)return ra.up-rb.up;
+    if(ra&&ra.rank>0)return-1;if(rb&&rb.rank>0)return 1;
+    return(b.createdAt||0)-(a.createdAt||0);
+  });
+  let h=hasComp?`<div class="compare-banner">💡 <strong>価格比較あり</strong> — 🥇が一番お得！単価が安い順に並んでいます</div>`:"";
+  h+=sorted.map(i=>cardHTML(i,ranks[i.id])).join("");
+  if(chk.length>0){
+    h+=`<div class="section-header"><span class="section-label">✓ 購入済み (${chk.length}件)</span><button class="btn-clear" onclick="askClearChecked()">まとめて削除</button></div>`;
+    h+=chk.map(i=>cardHTML(i,null)).join("");
+  }
+  main.innerHTML=h;
+}
 
-  // 価格比較グループを作る（同じ商品名でまとめる）
-  function getPriceRanks(unchecked) {
-    // 単価がある商品同士を名前でグルーピング
-    const groups = {};
-    unchecked.forEach(item => {
-      if (item.price && item.qty) {
-        const up = calcUnitPrice(item.price, item.qty);
-        if (up !== null) {
-          const key = item.name.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).trim();
-          if (!groups[key]) groups[key] = [];
-          groups[key].push({ id: item.id, unitPrice: up });
-        }
-      }
+function cardHTML(item,ri){
+  const tags=[];
+  if(item.qty||item.unit)tags.push(`<span class="tag tag-qty">${esc(item.qty||"")}${esc(item.unit||"")}</span>`);
+  if(item.price)tags.push(`<span class="tag tag-price">💴 ${esc(item.price)}</span>`);
+  if(ri&&ri.up){const u=ri.up<10?ri.up.toFixed(2):Math.round(ri.up);tags.push(`<span class="tag tag-unit-price">単価 ¥${u}/${esc(item.unit||"個")}</span>`);}
+  if(ri&&ri.rank===1)tags.push(`<span class="tag tag-cheapest">🥇 最安値</span>`);
+  if(item.checked&&item.checkedAt)tags.push(`<span class="tag tag-date">購入 ${fmtDate(item.checkedAt)}</span>`);
+  let rb="";
+  if(ri&&ri.rank===1)rb=`<div class="rank-badge r1">🥇 最安</div>`;
+  else if(ri&&ri.rank===2)rb=`<div class="rank-badge r2">🥈 2位</div>`;
+  else if(ri&&ri.rank===3)rb=`<div class="rank-badge r3">🥉 3位</div>`;
+  const cls=item.checked?"checked":(ri&&ri.rank>=1?`rank-${Math.min(ri.rank,3)}`:"");
+  const meta=getCatName(item);
+  return`<div class="item-card ${cls}">${rb}<button class="check-btn ${item.checked?"checked":""}" onclick="toggleCheck('${item.id}')">${item.checked?"✓":""}</button><div class="item-content">${meta?`<div class="item-meta">${esc(meta)}</div>`:""}<div class="item-name ${item.checked?"checked":""}">${esc(item.name)}</div>${tags.length?`<div class="tags">${tags.join("")}</div>`:""}</div><button class="delete-btn" onclick="askDelete('${item.id}','${esc(item.name)}')">🗑 削除</button></div>`;
+}
+
+function renderForm(){
+  const uOpts=UNITS.map(u=>`<option value="${u}">${u}</option>`).join("");
+  const cOpts=categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
+  document.getElementById("mainContent").innerHTML=`
+    <div class="form-card">
+      <div class="form-group"><label class="form-label">商品名 <span class="required">*必須</span></label><input type="text" id="inputName" placeholder="例：牛乳" autofocus><div class="error-msg" id="nameError" style="display:none">商品名は必須です</div></div>
+      <div class="form-group"><label class="form-label">大分類（店舗タイプ）</label><div class="cat-select-row"><select id="inputCat" onchange="onCatChange()"><option value="">選択してください</option>${cOpts}</select><button class="btn-new-cat" onclick="openNewCatModal('big')">＋ 新規</button></div></div>
+      <div class="form-group"><label class="form-label">小分類（店舗名）</label><div class="cat-select-row"><select id="inputStore"><option value="">大分類を先に選択</option></select><button class="btn-new-cat" onclick="openNewCatModal('small')">＋ 新規</button></div></div>
+      <div class="row"><div class="form-group"><label class="form-label">数量</label><input type="number" id="inputQty" placeholder="2" oninput="updPrev()"></div><div class="form-group"><label class="form-label">単位</label><select id="inputUnit" onchange="updPrev()"><option value="">選択</option>${uOpts}</select></div></div>
+      <div class="form-group" style="margin-bottom:18px"><label class="form-label">価格メモ（例：¥198）</label><input type="text" id="inputPrice" placeholder="例：¥198" oninput="updPrev()"><div class="price-preview" id="pricePreview"></div></div>
+      <button class="btn-primary" id="addBtn" onclick="addItem()">リストに追加する</button>
+    </div>`;
+  document.getElementById("inputName").addEventListener("keydown",e=>{if(e.key==="Enter")addItem();});
+}
+
+function onCatChange(){
+  const cid=document.getElementById("inputCat").value;
+  const cat=categories.find(c=>c.id===cid);
+  const sel=document.getElementById("inputStore");
+  if(!cat){sel.innerHTML=`<option value="">大分類を先に選択</option>`;return;}
+  sel.innerHTML=`<option value="">指定なし</option>`+(cat.stores||[]).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("");
+}
+
+function updPrev(){
+  const qty=document.getElementById("inputQty")?.value;
+  const unit=document.getElementById("inputUnit")?.value;
+  const price=document.getElementById("inputPrice")?.value;
+  const p=document.getElementById("pricePreview");
+  if(!p)return;
+  if(qty&&price){const up=calcUp(price,qty);if(up!==null){p.style.display="block";p.textContent=`💡 単価: ¥${up<10?up.toFixed(2):Math.round(up)} / ${unit||"個"}`;return;}}
+  p.style.display="none";
+}
+
+async function addItem(){
+  const name=document.getElementById("inputName").value.trim();
+  if(!name){document.getElementById("inputName").classList.add("error-border");document.getElementById("nameError").style.display="block";return;}
+  const item={id:uid(),name,categoryId:document.getElementById("inputCat").value||"",storeId:document.getElementById("inputStore").value||"",qty:document.getElementById("inputQty").value,unit:document.getElementById("inputUnit").value,price:document.getElementById("inputPrice").value,checked:false,checkedAt:null,createdAt:Date.now()};
+  const btn=document.getElementById("addBtn");btn.disabled=true;btn.textContent="保存中...";setStatus("⟳ 同期中...");
+  try{await fbPut(`/shopping/items/${item.id}`,item);items.unshift(item);updateBadge();setStatus("✓ Firebase同期済み");switchTab("list");}
+  catch{setStatus("⚠ 保存失敗",true);btn.disabled=false;btn.textContent="リストに追加する";}
+}
+
+function renderSettings(){
+  document.getElementById("filterBar").style.display="none";
+  let h=`<div class="settings-section"><div class="settings-title">📂 大分類・店舗の管理</div>`;
+  if(categories.length===0)h+=`<div style="color:#aaa;font-size:13px;margin-bottom:12px">まだカテゴリがありません</div>`;
+  categories.forEach(cat=>{
+    h+=`<div class="cat-item"><div style="flex:1"><div class="cat-item-name">📁 ${esc(cat.name)}</div><div class="cat-item-sub">${(cat.stores||[]).length}店舗</div></div><button class="btn-icon" onclick="openEditCatModal('${cat.id}')">✏️</button><button class="btn-icon" onclick="askDeleteCat('${cat.id}','${esc(cat.name)}')">🗑</button></div>`;
+    (cat.stores||[]).forEach(s=>{
+      h+=`<div class="cat-item" style="margin-left:16px;background:#FAFAFA"><div style="flex:1"><div class="cat-item-name" style="font-size:13px">🏪 ${esc(s.name)}</div></div><button class="btn-icon" onclick="openEditStoreModal('${cat.id}','${s.id}')">✏️</button><button class="btn-icon" onclick="askDeleteStore('${cat.id}','${s.id}','${esc(s.name)}')">🗑</button></div>`;
     });
-    // 同じ名前が2件以上あれば安い順にランク付け
-    const ranks = {};
-    Object.values(groups).forEach(group => {
-      if (group.length >= 2) {
-        group.sort((a, b) => a.unitPrice - b.unitPrice);
-        group.forEach((g, i) => { ranks[g.id] = { rank: i + 1, unitPrice: g.unitPrice }; });
-      } else if (group.length === 1) {
-        ranks[group[0].id] = { rank: 0, unitPrice: group[0].unitPrice };
-      }
-    });
-    return ranks;
-  }
+    h+=`<button class="btn-add-cat" style="margin-left:16px;width:calc(100% - 16px);margin-bottom:10px" onclick="openNewStoreModal('${cat.id}')">＋ 店舗を追加</button>`;
+  });
+  h+=`<button class="btn-add-cat" onclick="openNewCatModal('big')">＋ 大分類を追加</button></div>`;
+  document.getElementById("mainContent").innerHTML=h;
+}
 
-  function renderList() {
-    const unchecked = items.filter(i => !i.checked);
-    const checked = items.filter(i => i.checked);
-    const main = document.getElementById("mainContent");
+function openModal(h){document.getElementById("modalContent").innerHTML=h;document.getElementById("modalOverlay").style.display="flex";}
+function closeModal(){document.getElementById("modalOverlay").style.display="none";pendingAction=null;}
 
-    if (items.length === 0) {
-      main.innerHTML = `
-        <div class="empty">
-          <div class="icon">🛒</div>
-          <div class="title">リストは空です</div>
-          <div class="sub">「＋ 追加」から商品を追加してください</div>
-        </div>`;
-      return;
-    }
+function openNewCatModal(type){
+  const isBig=type==="big";
+  let sel="";
+  if(!isBig){const opts=categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");sel=`<div class="form-group"><label class="form-label">大分類 <span class="required">*必須</span></label><select id="mCatId"><option value="">選択</option>${opts}</select></div>`;}
+  openModal(`<div class="modal-title">${isBig?"📁 大分類を追加":"🏪 店舗を追加"}</div>${sel}<div class="form-group"><label class="form-label">${isBig?"大分類名":"店舗名"} <span class="required">*必須</span></label><input type="text" id="mName" placeholder="${isBig?"例：スーパー":"例：オーケー"}"></div><div class="modal-btns"><button class="btn-cancel" onclick="closeModal()">キャンセル</button><button class="btn-ok" onclick="${isBig?"saveNewCat()":"saveNewStore()"}">追加する</button></div>`);
+}
 
-    const ranks = getPriceRanks(unchecked);
+function openNewStoreModal(catId){
+  openModal(`<div class="modal-title">🏪 店舗を追加</div><div class="form-group"><label class="form-label">店舗名 <span class="required">*必須</span></label><input type="text" id="mName" placeholder="例：おっかさん"></div><div class="modal-btns"><button class="btn-cancel" onclick="closeModal()">キャンセル</button><button class="btn-ok" onclick="saveNewStoreForCat('${catId}')">追加する</button></div>`);
+}
 
-    // 価格比較がある場合バナー表示
-    const hasCompare = Object.values(ranks).some(r => r.rank === 1);
-    let html = "";
-    if (hasCompare) {
-      html += `<div class="compare-banner">💡 <strong>価格比較あり</strong> — 🥇が一番お得です！単価が安い順に並んでいます</div>`;
-    }
+function openEditCatModal(catId){
+  const cat=categories.find(c=>c.id===catId);if(!cat)return;
+  openModal(`<div class="modal-title">✏️ 大分類を編集</div><div class="form-group"><label class="form-label">大分類名</label><input type="text" id="mName" value="${esc(cat.name)}"></div><div class="modal-btns"><button class="btn-cancel" onclick="closeModal()">キャンセル</button><button class="btn-ok" onclick="saveEditCat('${catId}')">保存</button></div>`);
+}
 
-    // 単価ありを安い順、なしを後ろに
-    const sorted = [...unchecked].sort((a, b) => {
-      const ra = ranks[a.id];
-      const rb = ranks[b.id];
-      if (ra && rb && ra.rank > 0 && rb.rank > 0) return ra.unitPrice - rb.unitPrice;
-      if (ra && ra.rank > 0) return -1;
-      if (rb && rb.rank > 0) return 1;
-      return (b.createdAt || 0) - (a.createdAt || 0);
-    });
+function openEditStoreModal(catId,storeId){
+  const cat=categories.find(c=>c.id===catId);const st=(cat?.stores||[]).find(s=>s.id===storeId);if(!st)return;
+  openModal(`<div class="modal-title">✏️ 店舗を編集</div><div class="form-group"><label class="form-label">店舗名</label><input type="text" id="mName" value="${esc(st.name)}"></div><div class="modal-btns"><button class="btn-cancel" onclick="closeModal()">キャンセル</button><button class="btn-ok" onclick="saveEditStore('${catId}','${storeId}')">保存</button></div>`);
+}
 
-    html += sorted.map(item => itemCardHTML(item, ranks[item.id])).join("");
+async function saveNewCat(){
+  const name=document.getElementById("mName").value.trim();if(!name)return;
+  const cat={id:uid(),name,stores:[]};categories.push(cat);closeModal();
+  await syncCats();if(currentTab==="settings")renderSettings();else{renderFilterBar();renderForm();}
+}
 
-    if (checked.length > 0) {
-      html += `
-        <div class="section-header">
-          <span class="section-label">✓ 購入済み (${checked.length}件)</span>
-          <button class="btn-clear" onclick="askClearChecked()">まとめて削除</button>
-        </div>`;
-      html += checked.map(item => itemCardHTML(item, null)).join("");
-    }
+async function saveNewStore(){
+  const catId=document.getElementById("mCatId")?.value;
+  const name=document.getElementById("mName").value.trim();
+  if(!catId||!name)return;await saveNewStoreForCat(catId,name);
+}
 
-    main.innerHTML = html;
-  }
+async function saveNewStoreForCat(catId,nameArg){
+  const name=nameArg||document.getElementById("mName")?.value.trim();if(!name)return;
+  const cat=categories.find(c=>c.id===catId);if(!cat)return;
+  if(!cat.stores)cat.stores=[];cat.stores.push({id:uid(),name});closeModal();
+  await syncCats();if(currentTab==="settings")renderSettings();else{renderFilterBar();onCatChange();}
+}
 
-  function itemCardHTML(item, rankInfo) {
-    const tags = [];
-    if (item.qty || item.unit) tags.push(`<span class="tag tag-qty">${item.qty || ""}${item.unit || ""}</span>`);
-    if (item.price) tags.push(`<span class="tag tag-price">💴 ${item.price}</span>`);
+async function saveEditCat(catId){
+  const name=document.getElementById("mName").value.trim();if(!name)return;
+  const cat=categories.find(c=>c.id===catId);if(cat)cat.name=name;closeModal();await syncCats();renderSettings();
+}
 
-    // 単価タグ
-    if (rankInfo && rankInfo.unitPrice) {
-      const upStr = rankInfo.unitPrice < 10
-        ? rankInfo.unitPrice.toFixed(2)
-        : Math.round(rankInfo.unitPrice);
-      tags.push(`<span class="tag tag-unit-price">単価 ¥${upStr}/${item.unit || "個"}</span>`);
-    }
-    if (rankInfo && rankInfo.rank === 1) tags.push(`<span class="tag tag-cheapest">🥇 最安値</span>`);
-    if (item.checked && item.checkedAt) tags.push(`<span class="tag tag-date">購入 ${formatDate(item.checkedAt)}</span>`);
+async function saveEditStore(catId,storeId){
+  const name=document.getElementById("mName").value.trim();if(!name)return;
+  const cat=categories.find(c=>c.id===catId);const st=(cat?.stores||[]).find(s=>s.id===storeId);if(st)st.name=name;closeModal();await syncCats();renderSettings();
+}
 
-    // ランクバッジ
-    let rankBadge = "";
-    if (rankInfo && rankInfo.rank === 1) rankBadge = `<div class="rank-badge r1">🥇 最安</div>`;
-    else if (rankInfo && rankInfo.rank === 2) rankBadge = `<div class="rank-badge r2">🥈 2位</div>`;
-    else if (rankInfo && rankInfo.rank === 3) rankBadge = `<div class="rank-badge r3">🥉 3位</div>`;
+function askDeleteCat(catId,name){
+  pendingAction=async()=>{categories=categories.filter(c=>c.id!==catId);await syncCats();renderSettings();};
+  openModal(`<div class="modal-title">🗑 大分類を削除</div><div style="font-size:14px;color:#666;margin-bottom:16px;line-height:1.6">「${esc(name)}」とその店舗をすべて削除しますか？</div><div class="modal-btns"><button class="btn-cancel" onclick="closeModal()">キャンセル</button><button class="btn-danger-sm" onclick="execPending()">削除する</button></div>`);
+}
 
-    const cardClass = item.checked ? "checked" : (rankInfo && rankInfo.rank >= 1 ? `rank-${rankInfo.rank}` : "");
+function askDeleteStore(catId,storeId,name){
+  pendingAction=async()=>{const cat=categories.find(c=>c.id===catId);if(cat)cat.stores=(cat.stores||[]).filter(s=>s.id!==storeId);await syncCats();renderSettings();};
+  openModal(`<div class="modal-title">🗑 店舗を削除</div><div style="font-size:14px;color:#666;margin-bottom:16px">「${esc(name)}」を削除しますか？</div><div class="modal-btns"><button class="btn-cancel" onclick="closeModal()">キャンセル</button><button class="btn-danger-sm" onclick="execPending()">削除する</button></div>`);
+}
 
-    return `
-      <div class="item-card ${cardClass}">
-        ${rankBadge}
-        <button class="check-btn ${item.checked ? "checked" : ""}" onclick="toggleCheck('${item.id}')">
-          ${item.checked ? "✓" : ""}
-        </button>
-        <div class="item-content">
-          <div class="item-name ${item.checked ? "checked" : ""}">${escapeHtml(item.name)}</div>
-          ${tags.length > 0 ? `<div class="tags">${tags.join("")}</div>` : ""}
-        </div>
-        <div class="delete-area">
-          <button class="delete-btn" onclick="askDelete('${item.id}', '${escapeHtml(item.name)}')">🗑 削除</button>
-        </div>
-      </div>`;
-  }
+async function execPending(){closeModal();if(pendingAction){await pendingAction();pendingAction=null;}}
 
-  function escapeHtml(str) {
-    return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-  }
+async function syncCats(){
+  setStatus("⟳ 同期中...");
+  try{const o={};categories.forEach(c=>{o[c.id]=c;});await fbPut("/shopping/categories",o);setStatus("✓ Firebase同期済み");}
+  catch{setStatus("⚠ 同期失敗",true);}
+}
 
-  // 削除確認
-  function askDelete(id, name) {
-    pendingDeleteId = id;
-    document.getElementById("confirmMsg").textContent = `「${name}」をリストから削除しますか？`;
-    document.getElementById("confirmOverlay").style.display = "flex";
-  }
+function askDelete(id,name){
+  pendingAction=async()=>{items=items.filter(i=>i.id!==id);renderList();updateBadge();setStatus("⟳ 同期中...");try{await fbDel(`/shopping/items/${id}`);setStatus("✓ Firebase同期済み");}catch{setStatus("⚠ 削除失敗",true);}};
+  openModal(`<div class="modal-title">🗑 削除しますか？</div><div style="font-size:14px;color:#666;margin-bottom:16px">「${esc(name)}」をリストから削除しますか？</div><div class="modal-btns"><button class="btn-cancel" onclick="closeModal()">キャンセル</button><button class="btn-danger-sm" onclick="execPending()">削除する</button></div>`);
+}
 
-  function askClearChecked() {
-    pendingDeleteId = "__checked__";
-    document.getElementById("confirmMsg").textContent = `購入済みの商品をすべて削除しますか？`;
-    document.getElementById("confirmOverlay").style.display = "flex";
-  }
+function askClearChecked(){
+  pendingAction=async()=>{const td=items.filter(i=>i.checked);items=items.filter(i=>!i.checked);renderList();updateBadge();setStatus("⟳ 同期中...");try{await Promise.all(td.map(i=>fbDel(`/shopping/items/${i.id}`)));setStatus("✓ Firebase同期済み");}catch{setStatus("⚠ 削除失敗",true);}};
+  openModal(`<div class="modal-title">🗑 購入済みを削除</div><div style="font-size:14px;color:#666;margin-bottom:16px">購入済みの商品をすべて削除しますか？</div><div class="modal-btns"><button class="btn-cancel" onclick="closeModal()">キャンセル</button><button class="btn-danger-sm" onclick="execPending()">削除する</button></div>`);
+}
 
-  function closeConfirm() {
-    pendingDeleteId = null;
-    document.getElementById("confirmOverlay").style.display = "none";
-  }
+async function toggleCheck(id){
+  const item=items.find(i=>i.id===id);if(!item)return;
+  item.checked=!item.checked;item.checkedAt=item.checked?new Date().toISOString():null;
+  renderList();updateBadge();setStatus("⟳ 同期中...");
+  try{await fbPut(`/shopping/items/${id}`,item);setStatus("✓ Firebase同期済み");}catch{setStatus("⚠ 同期失敗",true);}
+}
 
-  async function confirmDelete() {
-    closeConfirm();
-    if (!pendingDeleteId) return;
-    if (pendingDeleteId === "__checked__") {
-      const toDelete = items.filter(i => i.checked);
-      items = items.filter(i => !i.checked);
-      renderList(); updateBadge();
-      setStatus("⟳ 同期中...");
-      try { await Promise.all(toDelete.map(i => removeItem(i.id))); setStatus("✓ Firebase同期済み"); }
-      catch { setStatus("⚠ 削除失敗", true); }
-    } else {
-      items = items.filter(i => i.id !== pendingDeleteId);
-      renderList(); updateBadge();
-      setStatus("⟳ 同期中...");
-      try { await removeItem(pendingDeleteId); setStatus("✓ Firebase同期済み"); }
-      catch { setStatus("⚠ 削除失敗", true); }
-    }
-  }
+function switchTab(tab){
+  currentTab=tab;
+  ["list","add","settings"].forEach(t=>{document.getElementById("tab"+t.charAt(0).toUpperCase()+t.slice(1)).className="tab-btn"+(t===tab?" active":"");});
+  document.getElementById("fab").style.display=tab==="list"?"flex":"none";
+  document.getElementById("filterBar").style.display=tab==="list"?"flex":"none";
+  if(tab==="list"){renderFilterBar();renderList();}
+  else if(tab==="add")renderForm();
+  else renderSettings();
+}
 
-  // 追加フォーム
-  function renderForm() {
-    const unitOptions = UNITS.map(u => `<option value="${u}">${u}</option>`).join("");
-    document.getElementById("mainContent").innerHTML = `
-      <div class="form-card">
-        <div class="form-group">
-          <label class="form-label">商品名 <span class="required">*必須</span></label>
-          <input type="text" id="inputName" placeholder="例：牛乳" autofocus>
-          <div class="error-msg" id="nameError" style="display:none">商品名は必須です</div>
-        </div>
-        <div class="row">
-          <div class="form-group">
-            <label class="form-label">数量</label>
-            <input type="number" id="inputQty" placeholder="2" oninput="updatePricePreview()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">単位</label>
-            <select id="inputUnit" onchange="updatePricePreview()">
-              <option value="">選択</option>
-              ${unitOptions}
-            </select>
-          </div>
-        </div>
-        <div class="form-group" style="margin-bottom:20px">
-          <label class="form-label">価格メモ（例：¥198）</label>
-          <input type="text" id="inputPrice" placeholder="例：¥198" oninput="updatePricePreview()">
-          <div class="price-preview" id="pricePreview"></div>
-        </div>
-        <button class="btn-primary" id="addBtn" onclick="addItem()">リストに追加する</button>
-      </div>`;
-
-    document.getElementById("inputName").addEventListener("keydown", e => {
-      if (e.key === "Enter") addItem();
-    });
-  }
-
-  function updatePricePreview() {
-    const qty = document.getElementById("inputQty").value;
-    const unit = document.getElementById("inputUnit").value;
-    const price = document.getElementById("inputPrice").value;
-    const preview = document.getElementById("pricePreview");
-    if (qty && price) {
-      const up = calcUnitPrice(price, qty);
-      if (up !== null) {
-        const upStr = up < 10 ? up.toFixed(2) : Math.round(up);
-        preview.style.display = "block";
-        preview.textContent = `💡 単価: ¥${upStr} / ${unit || "個"}`;
-      } else {
-        preview.style.display = "none";
-      }
-    } else {
-      preview.style.display = "none";
-    }
-  }
-
-  async function addItem() {
-    const name = document.getElementById("inputName").value.trim();
-    if (!name) {
-      document.getElementById("inputName").classList.add("error-border");
-      document.getElementById("nameError").style.display = "block";
-      return;
-    }
-    const item = {
-      id: Date.now().toString(),
-      name,
-      qty: document.getElementById("inputQty").value,
-      unit: document.getElementById("inputUnit").value,
-      price: document.getElementById("inputPrice").value,
-      checked: false,
-      checkedAt: null,
-      createdAt: Date.now(),
-    };
-    const btn = document.getElementById("addBtn");
-    btn.disabled = true;
-    btn.textContent = "保存中...";
-    setStatus("⟳ 同期中...");
-    try {
-      await putItem(item);
-      items.unshift(item);
-      updateBadge();
-      setStatus("✓ Firebase同期済み");
-      switchTab("list");
-    } catch {
-      setStatus("⚠ 保存失敗", true);
-      btn.disabled = false;
-      btn.textContent = "リストに追加する";
-    }
-  }
-
-  async function toggleCheck(id) {
-    const item = items.find(i => i.id === id);
-    if (!item) return;
-    item.checked = !item.checked;
-    item.checkedAt = item.checked ? new Date().toISOString() : null;
-    renderList(); updateBadge();
-    setStatus("⟳ 同期中...");
-    try { await putItem(item); setStatus("✓ Firebase同期済み"); }
-    catch { setStatus("⚠ 同期失敗", true); }
-  }
-
-  // Init
-  loadItems(true);
-  setInterval(() => loadItems(false), POLL_INTERVAL);
+loadAll(true);
+setInterval(()=>loadAll(false),4000);
 </script>
 </body>
 </html>
